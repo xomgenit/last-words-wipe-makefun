@@ -10,12 +10,20 @@ const warning: string =
 
 const entry: string = `${handover}, ${warning}.`;
 
-if (entry.length < 1 || entry.length > 200) {
-  throw new Error(`entry length ${entry.length} is outside the 1-200 gate`);
+function assertWellFormed(candidate: string): void {
+  if (candidate.length < 1 || candidate.length > 200) {
+    throw new Error(
+      `entry length ${candidate.length} is outside the 1-200 gate`,
+    );
+  }
+  if (candidate.includes("\n") || candidate.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
+  if (candidate.trim().length === 0) {
+    throw new Error("entry must not be only whitespace");
+  }
 }
-if (entry.includes("\n") || entry.includes("\r")) {
-  throw new Error("entry must be a single line");
-}
+assertWellFormed(entry);
 
 const outDir: string = process.env.MAKEFUN_OUTPUT_DIR || "out";
 mkdirSync(outDir, { recursive: true });
@@ -29,3 +37,9 @@ writeFileSync(join(outDir, "entry.txt"), entry, "utf8");
 // - The surprise sits at the end: the password is routine, the grudge
 //   is the payload, and it lands in the final words.
 // - Sharp and tight: two clauses, one breath, nothing wasted.
+
+// Repair note (second pass): the gate checks now live in one named
+// function, assertWellFormed, so the rules read top to bottom — length,
+// single line, not blank — and the entry itself is unchanged. A dying
+// agent's last words deserve the same discipline as its code: pass on
+// what matters, warn about what still stings, and keep it to one line.
